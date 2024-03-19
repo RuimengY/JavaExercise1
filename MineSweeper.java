@@ -1,7 +1,5 @@
-
 import java.util.Random;
 import java.util.Scanner;
-import java.util.concurrent.CompletionService;
 
 public class MineSweeper {
     private int rows;
@@ -15,6 +13,7 @@ public class MineSweeper {
     //show是玩游戏的人看到的有*的界面
     private int[][] show;
     private int[][] right;
+
     public MineSweeper() {
         //初始化长宽
         Scanner sc = new Scanner(System.in);
@@ -23,10 +22,15 @@ public class MineSweeper {
             try {
                 String s = sc.nextLine();
                 String[] s1 = s.split(" ");
+                if (s1.length != 3) {
+                    throw new IllegalArgumentException("输入格式错误，请输入两个数，用空格分隔！");
+                }
                 rows = Integer.parseInt(s1[0]);
                 cols = Integer.parseInt(s1[1]);
                 mine = Integer.parseInt(s1[2]);
-                if (rows > 200 || cols > 200 || mine > rows * cols)
+                if (rows < 0 || cols < 0) {
+                    throw new ArrayIndexOutOfBoundsException("索引越界，请重新输入：");
+                } else if (rows > 200 || cols > 200 || mine > rows * cols)
                     System.out.println("输入错误，请重新输入：");
                 else {
                     board = new int[rows][cols];
@@ -39,15 +43,20 @@ public class MineSweeper {
                 System.out.println("请输入数字：");
             } catch (NegativeArraySizeException e) {
                 System.out.println("请输入正数：");
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            } catch (ArrayIndexOutOfBoundsException e) {
+                System.out.println(e.getMessage());
             }
         }
     }
+
     //由输入的行列确定三张地图的坐标
     public void initialize() {
         //lab4时发现要初始化需要先让格点数均为0
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                mines[i][j]=0;
+                mines[i][j] = 0;
             }
         }
         //mines是地雷的图，显示有雷的位置是1，其余没有雷的位置是0
@@ -185,7 +194,7 @@ public class MineSweeper {
                     } else break;
                 } catch (NumberFormatException e) {
                     System.out.println("输入格式错误，请输入整数！");
-                } catch (IllegalArgumentException e){
+                } catch (IllegalArgumentException e) {
                     System.out.println(e.getMessage());
                 }
             }
@@ -199,9 +208,9 @@ public class MineSweeper {
                         initialize();
 
                     }
-                    PlayOneTime(x, y);
+                    PlayOneTime(x, y, 1);
                 } else {
-                    PlayOneTime(x, y);
+                    PlayOneTime(x, y, 1);
                     //踩到雷，循环结束
                     if (board[x][y] == -1) break;
                 }
@@ -231,6 +240,7 @@ public class MineSweeper {
     //新建了已经标记的地雷数
     public void RightOperation(int x, int y) {
         right[x][y]++;
+        mark = 0;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (right[i][j] % 2 == 1) {
@@ -238,26 +248,25 @@ public class MineSweeper {
                 }
             }
         }
-        displayNormal();
+        PlayOneTime(x, y, 2);
     }
 
     //lab3中打印showMap,以及点开的格子是数字/雷，并输出相应的话
     //show，1表示没点开，0表示点开了
     //right，初始为0，每改一次加一，如果是偶数就不变，奇数变
     //lab4新增参数，1表示左键，2表示右键
-    public void PlayOneTime(int x, int y) {
+    public void PlayOneTime(int x, int y, int way) {
         System.out.println("已经标记的地雷数:" + mark);
         System.out.println("总地雷数" + mine);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                //左键是lab3的操作judge
-
+        if (way == 2) displayNormal();
+        else {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
                     if (i == x && j == y) {
                         judge(x, y);
                     }
-
+                }
             }
-
         }
     }
 
@@ -290,7 +299,6 @@ public class MineSweeper {
             }
         }
     }
-
 
 
 }
