@@ -1,5 +1,7 @@
+
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.CompletionService;
 
 public class MineSweeper {
     private int rows;
@@ -13,10 +15,10 @@ public class MineSweeper {
     //show是玩游戏的人看到的有*的界面
     private int[][] show;
     private int[][] right;
-
     public MineSweeper() {
         //初始化长宽
         Scanner sc = new Scanner(System.in);
+        System.out.println("请输入地雷图的长宽以及地雷的个数，中间用空格间隔");
         while (true) {
             try {
                 String s = sc.nextLine();
@@ -38,15 +40,16 @@ public class MineSweeper {
             } catch (NegativeArraySizeException e) {
                 System.out.println("请输入正数：");
             }
-
         }
-
-
     }
-
-
     //由输入的行列确定三张地图的坐标
     public void initialize() {
+        //lab4时发现要初始化需要先让格点数均为0
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                mines[i][j]=0;
+            }
+        }
         //mines是地雷的图，显示有雷的位置是1，其余没有雷的位置是0
         Random r = new Random();
         int number = 0;
@@ -100,7 +103,6 @@ public class MineSweeper {
     //lab2中实现打印一个地雷以及周围地雷数量
     //这是游戏输了之后的界面(展示全部界面)
     public void displayFinal() {
-        System.out.println("结束界面");
         //System.out.println("欢迎来到杨蕊萌制作的扫雷游戏，打印的地雷图如下：");
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -192,14 +194,14 @@ public class MineSweeper {
             if (lr == 1) {
                 //排除上来就是零的情况
                 if (i == 0) {
-                    System.out.println("x和y的值分别为:"+x+","+y);
                     while (board[x][y] == -1) {
+                        //有可能的错误在于，没有清空一开始有数字的格点
                         initialize();
+
                     }
-                    System.out.println("开始游戏界面");
-                    PlayOneTime(x, y, 1);
+                    PlayOneTime(x, y);
                 } else {
-                    PlayOneTime(x, y, 1);
+                    PlayOneTime(x, y);
                     //踩到雷，循环结束
                     if (board[x][y] == -1) break;
                 }
@@ -236,24 +238,24 @@ public class MineSweeper {
                 }
             }
         }
-        PlayOneTime(x, y, 2);
+        displayNormal();
     }
 
     //lab3中打印showMap,以及点开的格子是数字/雷，并输出相应的话
     //show，1表示没点开，0表示点开了
     //right，初始为0，每改一次加一，如果是偶数就不变，奇数变
     //lab4新增参数，1表示左键，2表示右键
-    public void PlayOneTime(int x, int y, int way) {
+    public void PlayOneTime(int x, int y) {
         System.out.println("已经标记的地雷数:" + mark);
         System.out.println("总地雷数" + mine);
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 //左键是lab3的操作judge
-                if (way == 1) {
+
                     if (i == x && j == y) {
                         judge(x, y);
                     }
-                } else displayNormal();
+
             }
 
         }
@@ -289,17 +291,8 @@ public class MineSweeper {
         }
     }
 
-    //lab4新增功能，在游戏玩完之后可以选择再来一局或者退出,实际为最后的方法
-    public void Game() {
-        System.out.println("欢迎来到杨蕊萌的扫雷游戏");
-        int choice = 1;
-        while (choice == 1) {
-            Scanner sc = new Scanner(System.in);
-            Play();
-            System.out.println("请选择：1为重新来一局，0为游戏结束");
-            choice = sc.nextInt();
-        }
-    }
+
+
 }
 
 
